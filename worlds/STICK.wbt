@@ -1,0 +1,113 @@
+#VRML_SIM R2025a utf8
+
+WorldInfo {
+  basicTimeStep 16
+  gravity 9.81
+}
+
+# Camera
+Viewpoint {
+  orientation 0.0686910785537092 0.011791292255969388 -0.9975682939799473 2.8024036525619906
+  position 1.8044496007954454 0.6762307107151491 0.538657350795988
+}
+
+# Directional light
+DirectionalLight {
+  direction -0.5 -1 -0.5
+  intensity 1
+  color 1 1 1
+}
+
+# Ground (no physics)
+Solid {
+  children [
+    Shape {
+      appearance Appearance { material Material { diffuseColor 0.4 0.4 0.4 } }
+      geometry Plane { size 100 100}
+    }
+  ]
+  boundingObject Plane { size 100 100}
+}
+
+# Cart robot
+Robot {
+  name "Cart"
+  translation 0 0 0.025  # Z = half cart height
+  children [
+    SliderJoint {
+      jointParameters JointParameters { axis 1 0 0 }
+      device [ LinearMotor { name "x motor" maxVelocity 5 } ]
+      endPoint Solid {
+        translation 0 0 0
+
+        # Main cart body
+        children [
+          Solid {
+            translation 0 0 0.025
+            children [
+              Shape {
+                geometry Box { size 0.2 0.2 0.05 }
+                appearance Appearance { material Material { diffuseColor 0.2 0.6 0.9 } }
+              }
+            ]
+            boundingObject Box { size 0.2 0.2 0.05 }
+            physics Physics { mass 1 friction 0.5 }
+          }
+
+        ]
+
+        # Main bounding object for the cart
+        boundingObject Box { size 0.2 0.2 0.05 }
+      }
+    }
+  ]
+  controller "cart_controller"
+}
+
+# Capsule-shaped stick
+Solid {
+  name "Stick"
+  translation 0 0 0.25
+  children [
+
+    # Middle cylinder
+    Solid {
+      translation 0 0 0
+      children [
+        Shape {
+          geometry Cylinder { radius 0.02 height 0.46 }
+          appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
+        }
+      ]
+      boundingObject Cylinder { radius 0.02 height 0.46 }
+      physics Physics { mass 1 friction 0 }
+    }
+
+    # Top hemisphere
+    Solid {
+      translation 0 0 0.23
+      children [
+        Shape {
+          geometry Sphere { radius 0.02 }
+          appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
+        }
+      ]
+      boundingObject Sphere { radius 0.02 }
+      physics Physics { mass 0.1 friction 0 }
+    }
+
+    # Bottom hemisphere
+    Solid {
+      translation 0 0 -0.23
+      children [
+        Shape {
+          geometry Sphere { radius 0.02 }
+          appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
+        }
+      ]
+      boundingObject Sphere { radius 0.02 }
+      physics Physics { mass 0.1 friction 0 }
+    }
+
+  ]
+}
