@@ -1,0 +1,83 @@
+# --------------------------
+# Webots Project Ignored Files
+# --------------------------
+
+# Webots cache and temporary files
+*.bak
+*.tmp
+*.log
+*.wbo~
+*.wbt~
+*.pyc
+*.class
+*.swp
+*.lock
+
+# Controller build outputs
+controllers/*/build/
+controllers/*/CMakeFiles/
+controllers/*/*.o
+controllers/*/*.exe
+controllers/*/*.dll
+controllers/*/*.so
+controllers/*/*.dylib
+
+# Compilation intermediates
+*.obj
+*.out
+
+# Webots runtime data (world backups, auto-saves, etc.)
+*.old
+*.wbt.bak
+*.proto.bak
+*.png.bak
+*.jpg.bak
+
+# Webots generated directories
+cache/
+tmp/
+build/
+textures/generated/
+project_cache/
+
+# Python virtual environments
+venv/
+.env/
+__pycache__/
+
+# OS specific junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE settings (optional)
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Webots recordings and renders
+recordings/
+images/
+videos/
+snapshots/
+screenshots/
+
+# Robot controllers logs
+controllers/*/*.log
+controllers/*/output.txt
+
+# Optional simulation result files
+*.csv
+*.tsv
+*.json
+*.dat
+*.txt
+
+# Custom local configs
+local_config.json
+settings.json
+
+# --------------------------
+# End of Webots .gitignore
+# --------------------------
