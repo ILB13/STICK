@@ -30,84 +30,58 @@ Solid {
 }
 
 # Cart robot
+# Cart robot (Z is height)
 Robot {
   name "Cart"
-  translation 0 0 0.025  # Z = half cart height
+  translation 0 0 0.025  # Z = half cart height so it rests on plane
   children [
     SliderJoint {
-      jointParameters JointParameters { axis 1 0 0 }
+      jointParameters JointParameters { axis 1 0 0 }  # slides along X
       device [ LinearMotor { name "x motor" maxVelocity 5 } ]
       endPoint Solid {
-        translation 0 0 0
-
-        # Main cart body
+        translation 0 0 0.025
         children [
-          Solid {
-            translation 0 0 0.025
-            children [
-              Shape {
-                geometry Box { size 0.2 0.2 0.05 }
-                appearance Appearance { material Material { diffuseColor 0.2 0.6 0.9 } }
-              }
-            ]
-            boundingObject Box { size 0.2 0.2 0.05 }
-            physics Physics { mass 1 friction 0.5 }
+          Shape {
+            geometry Box { size 0.2 0.2 0.05 }
+            appearance Appearance {
+              material Material { diffuseColor 0.2 0.6 0.9 }
+            }
           }
-
         ]
-
-        # Main bounding object for the cart
         boundingObject Box { size 0.2 0.2 0.05 }
+        physics Physics { mass 1 }
       }
     }
   ]
   controller "cart_controller"
 }
 
-# Capsule-shaped stick
 Solid {
   name "Stick"
-  translation 0 0 0.25
+  translation 0 0 0.33
+  rotation 1 0 0 0.0002  # small tilt
   children [
-
-    # Middle cylinder
-    Solid {
-      translation 0 0 0
-      children [
-        Shape {
-          geometry Cylinder { radius 0.02 height 0.46 }
-          appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
-        }
-      ]
-      boundingObject Cylinder { radius 0.02 height 0.46 }
-      physics Physics { mass 1 friction 0 }
+    Shape {
+      geometry Cylinder { radius 0.02 height 0.46 }
+      appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
     }
-
-    # Top hemisphere
-    Solid {
+    Transform {
       translation 0 0 0.23
-      children [
-        Shape {
-          geometry Sphere { radius 0.02 }
-          appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
-        }
-      ]
-      boundingObject Sphere { radius 0.02 }
-      physics Physics { mass 0.1 friction 0 }
+      children [ Shape { geometry Sphere { radius 0.02 }
+                         appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } } ]
     }
-
-    # Bottom hemisphere
-    Solid {
+    Transform {
       translation 0 0 -0.23
-      children [
-        Shape {
-          geometry Sphere { radius 0.02 }
-          appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
-        }
-      ]
-      boundingObject Sphere { radius 0.02 }
-      physics Physics { mass 0.1 friction 0 }
+      children [ Shape { geometry Sphere { radius 0.02 }
+                         appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } } ]
     }
-
   ]
+  boundingObject Group {
+    children [
+      Cylinder { radius 0.02 height 0.46 }
+      Transform { translation 0 0 0.23 children [ Sphere { radius 0.02 } ] }
+      Transform { translation 0 0 -0.23 children [ Sphere { radius 0.02 } ] }
+    ]
+  }
+  physics Physics { mass 1.2 friction 1}   # one physics block here only
 }
