@@ -20,8 +20,8 @@ WorldInfo {
 
 # Camera
 Viewpoint {
-  orientation 0.0686910785537092 0.011791292255969388 -0.9975682939799473 2.8024036525619906
-  position 1.8044496007954454 0.6762307107151491 0.538657350795988
+  orientation 0.013748294993807449 0.01360065943500682 -0.9998129857366806 1.581779674252382
+  position 0.0624620365351748 1.9282260565193057 0.33249020966341003
 }
 
 # Directional light
@@ -42,84 +42,96 @@ Solid {
   boundingObject Plane { size 100 100}
 }
 
-# Cart robot
-# Cart robot (Z is height)
+# --- Cart robot ---
+# --- Cart robot ---
 Robot {
   name "Cart"
-  translation 0 0 0.025  # Z = half cart height so it rests on the plane
+  translation 0 0 0.025  # Z = half cart height
   children [
+    # Cart slides along X
     SliderJoint {
-      jointParameters JointParameters { axis 1 0 0 }  # slides along X
-      device [ LinearMotor { name "x motor" maxVelocity 5 } ]
-
-      # Lower section (low friction)
+      jointParameters JointParameters { axis 1 0 0 }
+      device [ LinearMotor { name "x motor" maxVelocity 10 } ]
+      
+      # Moving part of the slider: the cart body
       endPoint Solid {
-        name "CartBottom"
-        contactMaterial "cart_bottom"
-        translation 0 0 0.0125
+        name "CartBody"
+        translation 0 0 0.025
         children [
+          # Cart box shape
           Shape {
-            geometry Box { size 0.2 0.2 0.025 }  # bottom layer
+            geometry Box { size 0.2 0.2 0.05 }
             appearance Appearance {
               material Material { diffuseColor 0.2 0.6 0.9 }
             }
           }
 
-          # Upper section (high friction) fixed to the bottom
-          FixedJoint {
+          # Stick hinge joint (attached to top of cart)
+          HingeJoint {
+            jointParameters HingeJointParameters {
+              anchor 0 0 0.05     # top center of the cart
+              axis 0 1 0          # rotate around Y-axis
+            }
+            device [
+              PositionSensor { name "stick_angle_sensor" }
+            ]
+
             endPoint Solid {
-              name "CartTop"
-              contactMaterial "cart_top"
-              translation 0 0 0.025  # sits right above bottom
+              name "Stick"
+              translation 0 0 0.25   # center so bottom hemisphere meets hinge
               children [
+                # Main stick cylinder
                 Shape {
-                  geometry Box { size 0.2 0.2 0.025 }  # top layer
+                  geometry Cylinder { radius 0.02 height 0.46 }
                   appearance Appearance {
-                    material Material { diffuseColor 0.2 0.6 0.9 }
+                    material Material { diffuseColor 0.7 0.7 0.7 }
                   }
                 }
+
+                # Top hemisphere
+                Transform {
+                  translation 0 0 0.23
+                  children [
+                    Shape {
+                      geometry Sphere { radius 0.02 }
+                      appearance Appearance {
+                        material Material { diffuseColor 0.7 0.7 0.7 }
+                      }
+                    }
+                  ]
+                }
+
+                # Bottom hemisphere
+                Transform {
+                  translation 0 0 -0.23
+                  children [
+                    Shape {
+                      geometry Sphere { radius 0.02 }
+                      appearance Appearance {
+                        material Material { diffuseColor 0.7 0.7 0.7 }
+                      }
+                    }
+                  ]
+                }
               ]
-              boundingObject Box { size 0.2 0.2 0.025 }
-              physics Physics { mass 0.5 }
+
+              # Combined collision shape
+              boundingObject Group {
+                children [
+                  Cylinder { radius 0.02 height 0.46 }
+                  Transform { translation 0 0 0.23 children [ Sphere { radius 0.02 } ] }
+                  Transform { translation 0 0 -0.23 children [ Sphere { radius 0.02 } ] }
+                ]
+              }
+
+              physics Physics { mass 1.2 }
             }
           }
         ]
-
-        # The bottom layer carries the physics for the whole cart
-        boundingObject Box { size 0.2 0.2 0.025 }
-        physics Physics { mass 0.5 }
+        boundingObject Box { size 0.2 0.2 0.05 }
+        physics Physics { mass 1.0 }
       }
     }
   ]
   controller "cart_controller"
-}
-
-Solid {
-  name "Stick"
-  translation 0 0 0.33
-  rotation 1 0 0 0.0002  # small tilt
-  children [
-    Shape {
-      geometry Cylinder { radius 0.02 height 0.46 }
-      appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } }
-    }
-    Transform {
-      translation 0 0 0.23
-      children [ Shape { geometry Sphere { radius 0.02 }
-                         appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } } ]
-    }
-    Transform {
-      translation 0 0 -0.23
-      children [ Shape { geometry Sphere { radius 0.02 }
-                         appearance Appearance { material Material { diffuseColor 0.7 0.7 0.7 } } } ]
-    }
-  ]
-  boundingObject Group {
-    children [
-      Cylinder { radius 0.02 height 0.46 }
-      Transform { translation 0 0 0.23 children [ Sphere { radius 0.02 } ] }
-      Transform { translation 0 0 -0.23 children [ Sphere { radius 0.02 } ] }
-    ]
-  }
-  physics Physics { mass 1.2 friction 1}   # one physics block here only
 }
