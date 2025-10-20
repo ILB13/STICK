@@ -3,7 +3,20 @@
 WorldInfo {
   basicTimeStep 16
   gravity 9.81
+  contactProperties [
+    ContactProperties {
+      material1 "cart_bottom"
+      material2 "ground"
+      coulombFriction 0.1     # slippery bottom
+    }
+    ContactProperties {
+      material1 "cart_top"
+      material2 "stick"
+      coulombFriction 1.5     # sticky top
+    }
+  ]
 }
+
 
 # Camera
 Viewpoint {
@@ -33,23 +46,48 @@ Solid {
 # Cart robot (Z is height)
 Robot {
   name "Cart"
-  translation 0 0 0.025  # Z = half cart height so it rests on plane
+  translation 0 0 0.025  # Z = half cart height so it rests on the plane
   children [
     SliderJoint {
       jointParameters JointParameters { axis 1 0 0 }  # slides along X
       device [ LinearMotor { name "x motor" maxVelocity 5 } ]
+
+      # Lower section (low friction)
       endPoint Solid {
-        translation 0 0 0.025
+        name "CartBottom"
+        contactMaterial "cart_bottom"
+        translation 0 0 0.0125
         children [
           Shape {
-            geometry Box { size 0.2 0.2 0.05 }
+            geometry Box { size 0.2 0.2 0.025 }  # bottom layer
             appearance Appearance {
               material Material { diffuseColor 0.2 0.6 0.9 }
             }
           }
+
+          # Upper section (high friction) fixed to the bottom
+          FixedJoint {
+            endPoint Solid {
+              name "CartTop"
+              contactMaterial "cart_top"
+              translation 0 0 0.025  # sits right above bottom
+              children [
+                Shape {
+                  geometry Box { size 0.2 0.2 0.025 }  # top layer
+                  appearance Appearance {
+                    material Material { diffuseColor 0.2 0.6 0.9 }
+                  }
+                }
+              ]
+              boundingObject Box { size 0.2 0.2 0.025 }
+              physics Physics { mass 0.5 }
+            }
+          }
         ]
-        boundingObject Box { size 0.2 0.2 0.05 }
-        physics Physics { mass 1 }
+
+        # The bottom layer carries the physics for the whole cart
+        boundingObject Box { size 0.2 0.2 0.025 }
+        physics Physics { mass 0.5 }
       }
     }
   ]
